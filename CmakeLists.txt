@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 3.22)
+
+project(Terraria LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# raylib
+add_subdirectory(thirdParty/raylib)
+
+# Application
+file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+)
+
+add_executable(Terraria ${MY_SOURCES})
+
+target_include_directories(Terraria PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+)
+
+target_compile_definitions(Terraria PRIVATE
+    RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/"
+)
+
+target_link_libraries(Terraria PRIVATE
+    raylib
+)
