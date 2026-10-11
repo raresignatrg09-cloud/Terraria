@@ -10,7 +10,10 @@ public:
 	Player(Vector2 position);
 	~Player();
 	void update(float dt);
-	void draw() const;
+	void draw(bool drawDebug = false) const;
+
+	Vector2 getPosition() const { return position; }
+	Vector2 getTilePosition() const;
 
 private:
 	Vector2 position{};

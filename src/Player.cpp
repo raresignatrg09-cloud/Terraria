@@ -1,8 +1,9 @@
 #include "headers/Player.h"
 #include <raymath.h>
+#include <cmath>
 
 Player::Player(Vector2 position)
-	: position(position), size({ 50.0f, 50.0f }), speed(400.0f), velocity({ 0.0f, 0.0f })
+	: position(position), size({ 32.0f, 32.0f }), speed(400.0f), velocity({ 0.0f, 0.0f })
 {
 	hitbox.setSize(size, hitboxScale);
 	hitbox.setPosition(position, size);
@@ -46,32 +47,24 @@ void Player::update(float dt)
 	position = Vector2Add(position, Vector2Scale(velocity, dt));
 
 	hitbox.setPosition(position, size);
-
-	// Get current hitbox
-	Rectangle rect = hitbox.getHitbox();
-
-	// Keep player inside screen
-	if (rect.x < 0)
-		position.x -= rect.x;
-
-	if (rect.x + rect.width > GetScreenWidth())
-		position.x -= (rect.x + rect.width) - GetScreenWidth();
-
-	if (rect.y < 0)
-		position.y -= rect.y;
-
-	if (rect.y + rect.height > GetScreenHeight())
-		position.y -= (rect.y + rect.height) - GetScreenHeight();
-
-	// Update hitbox again after correcting position
-	hitbox.setPosition(position, size);
 }
 
-void Player::draw() const
+void Player::draw(bool drawDebug) const
 {
 	DrawRectangleV(position, size, BLUE);
 
-#ifdef _DEBUG
-	hitbox.draw();
+#if defined(_DEBUG) || !defined(NDEBUG)
+	if (drawDebug)
+	{
+		hitbox.draw();
+	}
 #endif
+}
+
+Vector2 Player::getTilePosition() const
+{
+	return {
+		std::floor((position.x + size.x / 2.0f) / 32.0f),
+		std::floor((position.y + size.y / 2.0f) / 32.0f) 
+	};
 }
