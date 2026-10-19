@@ -1,9 +1,10 @@
 #include "headers/Player.h"
+#include "headers/Constants.h"
 #include <raymath.h>
 #include <cmath>
 
 Player::Player(Vector2 position)
-	: position(position), size({ 32.0f, 32.0f }), speed(400.0f), velocity({ 0.0f, 0.0f })
+	: position(position), size({ static_cast<float>(TILE_SIZE), static_cast<float>(TILE_SIZE) }), speed(400.0f), velocity({ 0.0f, 0.0f })
 {
 	hitbox.setSize(size, hitboxScale);
 	hitbox.setPosition(position, size);
@@ -64,7 +65,7 @@ void Player::draw(bool drawDebug) const
 Vector2 Player::getTilePosition() const
 {
 	return {
-		std::floor((position.x + size.x / 2.0f) / 32.0f),
-		std::floor((position.y + size.y / 2.0f) / 32.0f) 
+		std::floor((position.x + size.x / 2.0f) / TILE_SIZE),
+		WORLD_HEIGHT - 1 - std::floor((position.y + size.y / 2.0f) / TILE_SIZE)
 	};
 }

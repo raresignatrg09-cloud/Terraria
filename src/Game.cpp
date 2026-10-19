@@ -1,4 +1,5 @@
 #include "headers/Game.h"
+#include "headers/TileRegistry.h"
 
 Game::Game(int width, int height, const char* title)
 	: screenWidth(width), screenHeight(height), windowTitle(title)
@@ -52,6 +53,101 @@ void Game::handleInput()
 	{
 		debugMode = !debugMode;
 	}
+	if (IsKeyPressed(KEY_ONE))
+	{
+		inventory.selectSlot(0);
+	}
+	if(IsKeyPressed(KEY_TWO))
+	{
+		inventory.selectSlot(1);
+	}
+	if (IsKeyPressed(KEY_THREE))
+	{
+		inventory.selectSlot(2);
+	}
+	if (IsKeyPressed(KEY_FOUR))
+	{
+		inventory.selectSlot(3);
+	}
+	if (IsKeyPressed(KEY_FIVE))
+	{
+		inventory.selectSlot(4);
+	}
+	if (IsKeyPressed(KEY_SIX))
+	{
+		inventory.selectSlot(5);
+	}
+	if (IsKeyPressed(KEY_SEVEN))
+	{
+		inventory.selectSlot(6);
+	}
+	if (IsKeyPressed(KEY_EIGHT))
+	{
+		inventory.selectSlot(7);
+	}
+	if (IsKeyPressed(KEY_NINE))
+	{
+		inventory.selectSlot(8);
+	}
+
+	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+	{
+		Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), camera);
+
+		const int tileX = static_cast<int>(std::floor(mouseWorldPos.x / TILE_SIZE));
+		const int tileY = static_cast<int>(std::floor(mouseWorldPos.y / TILE_SIZE));
+
+		int chunkX = static_cast<int>(std::floor(static_cast<float>(tileX) / CHUNK_SIZE));
+
+		int chunkY = static_cast<int>(std::floor(static_cast<float>(tileY) / CHUNK_SIZE));
+
+		int localX = tileX - chunkX * CHUNK_SIZE;
+		int localY = tileY - chunkY * CHUNK_SIZE;
+
+
+		Tile* tile = world.getTileAt(
+			static_cast<float>(tileX),
+			static_cast<float>(tileY)
+		);
+
+		if (tile != nullptr)
+		{
+			const TileDefinition* def = getTileDefinition(tile->id);
+
+			if (def != nullptr &&
+				def->breakable &&
+				def->drop != ItemType::NONE)
+			{
+				Item item;
+				item.type = def->drop;
+
+				if (inventory.addItem(item, def->dropCount))
+				{
+					tile->id = AIR;
+				}
+			}
+		}
+	}
+
+	if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
+	{
+		Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), camera);
+
+		const int tileX = static_cast<int>(std::floor(mouseWorldPos.x / TILE_SIZE));
+		const int tileY = static_cast<int>(std::floor(mouseWorldPos.y / TILE_SIZE));
+
+		int chunkX = static_cast<int>(std::floor(static_cast<float>(tileX) / CHUNK_SIZE));
+		int chunkY = static_cast<int>(std::floor(static_cast<float>(tileY) / CHUNK_SIZE));
+
+		int localX = tileX - chunkX * CHUNK_SIZE;
+		int localY = tileY - chunkY * CHUNK_SIZE;
+
+		Tile* tile = world.getTileAt(static_cast<float>(tileX), static_cast<float>(tileY));
+		if (tile != nullptr && tile->id !=TileType::BEDROCK)
+		{
+			tile->id = currentTileType;
+		}
+	}
 }
 
 void Game::update()
@@ -69,9 +165,7 @@ void Game::draw()
 	ClearBackground(SKYBLUE);
 
 	BeginMode2D(camera);
-	// Randăm blocurile din lume
 		world.draw(tileset, debugMode);
-		
 		player.draw(debugMode);
 	EndMode2D();
 	
@@ -83,5 +177,34 @@ void Game::draw()
 		DrawText(TextFormat("x: %.0f, y: %.0f", tilePosition.x, tilePosition.y), 10, 30, 20, WHITE);
 	}
 
+	drawHotbar();
+
 	EndDrawing();
+}
+
+void Game::drawHotbar() const
+{
+	constexpr int SLOT_SIZE = 50;
+	constexpr int SLOT_GAP = 4;
+	constexpr int TOTAL_WIDTH = 9 * SLOT_SIZE + 8 * SLOT_GAP;
+
+	int startX = (GetScreenWidth() - TOTAL_WIDTH) / 2;
+	int y = GetScreenHeight() - SLOT_SIZE - 20;
+
+	for (int i = 0; i < Inventory::MAX_SLOTS; ++i)
+	{
+		int x = startX + i * (SLOT_SIZE + SLOT_GAP);
+
+		Color color = i == inventory.getSelectedSlotIndex() ? YELLOW : DARKGRAY;
+
+		DrawRectangle(x, y, SLOT_SIZE, SLOT_SIZE, color);
+		DrawRectangleLines(x, y, SLOT_SIZE, SLOT_SIZE, BLACK);
+
+		const InventorySlot& slot = inventory.getSlot(i);
+
+		if (!slot.isEmpty())
+		{
+			DrawText(TextFormat("%d", slot.count), x + 28, y + 28, 16, WHITE);
+		}
+	}
 }

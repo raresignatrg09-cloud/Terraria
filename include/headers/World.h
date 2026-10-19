@@ -18,6 +18,8 @@ public:
 
 	static int PixelToChunkCoord(float pixelCoord);
 	static int PixelToTileCoord(float pixelCoord);
+	static int PixelToTileCoord(Vector2 pixelCoord);
+	Tile* getTileAt(float tileX, float tileY);
 
 private:
 	std::unordered_map<std::uint64_t, std::unique_ptr<Chunk>> chunks;

@@ -3,6 +3,8 @@
 #include <raylib.h>
 #include "Player.h"
 #include "World.h"
+#include "Inventory.h"
+#include "TileRegistry.h"
 
 class Game 
 {
@@ -17,7 +19,8 @@ private:
 	void update();
 	void draw();
 
-	Vector2 getPlayerWorldPosition();
+	void drawHotbar() const;
+
 private:
 	int screenWidth;
 	int screenHeight;
@@ -29,4 +32,6 @@ private:
 	Texture2D tileset{};
 
 	bool debugMode = false;
+	TileType currentTileType = TileType::AIR;
+	Inventory inventory{};
 };

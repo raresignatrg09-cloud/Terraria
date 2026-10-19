@@ -12,6 +12,33 @@ int World::PixelToTileCoord(float pixelCoord)
 	return static_cast<int>(std::floor(pixelCoord / TILE_SIZE));
 }
 
+int World::PixelToTileCoord(Vector2 pixelCoord)
+{
+	return static_cast<int>(std::floor(pixelCoord.x / TILE_SIZE));
+}
+
+Tile* World::getTileAt(float tileX, float tileY)
+{
+	int chunkX = static_cast<int>(std::floor(static_cast<float>(tileX) / CHUNK_SIZE));
+	int chunkY = static_cast<int>(std::floor(static_cast<float>(tileY) / CHUNK_SIZE));
+
+	if (chunkX<MIN_CHUNK_Y || chunkX>MAX_CHUNK_Y)
+		return nullptr;
+
+	uint64_t key = getChunkKey(chunkX, chunkY);
+
+	auto it = chunks.find(key);
+	if (it == chunks.end())
+	{
+		return nullptr;
+	}
+
+	int localTileX = static_cast<int>(tileX) - chunkX * CHUNK_SIZE;
+	int localTileY = static_cast<int>(tileY) - chunkY * CHUNK_SIZE;
+
+	return &it->second->getTile(localTileX, localTileY);
+}
+
 void World::update(const Camera2D& camera)
 {
 	Vector2 topLeft = GetScreenToWorld2D({ 0,0 }, camera);

@@ -13,7 +13,7 @@ constexpr int MIN_CHUNK_Y = 0;
 constexpr int MAX_CHUNK_Y = (WORLD_HEIGHT - 1) / CHUNK_SIZE; // 12
 
 // Terrain coordinates (bottom-up)
-constexpr int SURFACE_Y = 40;
+constexpr int SURFACE_Y = 100;
 constexpr int HEIGHT_VARIATION = 5;
 constexpr int DIRT_DEPTH = 5;
 constexpr int BEDROCK_Y = 0;

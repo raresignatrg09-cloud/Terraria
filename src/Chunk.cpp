@@ -20,6 +20,7 @@ void Chunk::generate()
 	for (int x = 0; x < CHUNK_SIZE; ++x)
 	{
 		const int worldX = cx * CHUNK_SIZE + x;
+
 		const float value = noise.GetNoise(
 			static_cast<float>(worldX), 0.0f
 		);
@@ -29,10 +30,13 @@ void Chunk::generate()
 
 		for (int y = 0; y < CHUNK_SIZE; ++y)
 		{
-			// cy = 0 is the bottom chunk.
-			const int worldY = WORLD_HEIGHT - 1 - (cy * CHUNK_SIZE + y);
+			// Drawing uses top-down tile coordinates.
+			const int screenTileY = cy * CHUNK_SIZE + y;
 
-			if (worldY < BEDROCK_Y)
+			// Convert to bottom-up world coordinates.
+			const int worldY = WORLD_HEIGHT - 1 - screenTileY;
+
+			if (worldY < 0 || worldY >= WORLD_HEIGHT)
 				tiles[x][y].id = AIR;
 			else if (worldY == BEDROCK_Y)
 				tiles[x][y].id = BEDROCK;
