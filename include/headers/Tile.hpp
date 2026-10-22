@@ -2,7 +2,7 @@
 
 enum TileType
 {
-	AIR=-1,
+	AIR = -1,
 	GRASS,
 	STONE,
 	DIRT,

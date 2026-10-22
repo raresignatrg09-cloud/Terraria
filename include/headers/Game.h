@@ -5,6 +5,7 @@
 #include "World.h"
 #include "Inventory.h"
 #include "TileRegistry.h"
+#include "TileRenderer.h"
 
 class Game 
 {
@@ -19,7 +20,7 @@ private:
 	void update();
 	void draw();
 
-	void drawHotbar() const;
+	void drawHotbar(const TileRenderer& renderer) const;
 
 private:
 	int screenWidth;
@@ -34,4 +35,5 @@ private:
 	bool debugMode = false;
 	TileType currentTileType = TileType::AIR;
 	Inventory inventory{};
+	TileRenderer tileRenderer;
 };

@@ -4,6 +4,7 @@
 #include "Tile.hpp"
 #include "FastNoiseLite.h"
 #include "Constants.h"
+#include "TileRenderer.h"
 
 class Chunk
 {
@@ -11,7 +12,7 @@ public:
 	Chunk(int chunkX, int chunkY);
 	~Chunk() = default;
 	void generate();
-	void draw(const Texture2D& tileset) const;
+	void draw(const TileRenderer& renderer) const;
 
 	Tile& getTile(int localX, int localY);
 	const Tile& getTile(int localX, int localY) const;

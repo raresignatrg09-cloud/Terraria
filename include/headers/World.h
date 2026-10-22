@@ -14,7 +14,7 @@ public:
 	~World() = default;
 	
 	void update(const Camera2D& camera);
-	void draw(const Texture2D& tileset, bool drawDebug = false) const;
+	void draw(const TileRenderer& renderer, bool drawDebug = false) const;
 
 	static int PixelToChunkCoord(float pixelCoord);
 	static int PixelToTileCoord(float pixelCoord);

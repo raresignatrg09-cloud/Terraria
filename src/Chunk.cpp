@@ -1,4 +1,5 @@
 #include "headers/Chunk.h"
+#include "headers/TileRenderer.h"
 
 #include <stdexcept>
 #include <string>
@@ -52,7 +53,7 @@ void Chunk::generate()
 	}
 }
 
-void Chunk::draw(const Texture2D& tileset) const
+void Chunk::draw(const TileRenderer& renderer) const
 {
 	for (int x = 0; x < CHUNK_SIZE; ++x)
 	{
@@ -61,21 +62,10 @@ void Chunk::draw(const Texture2D& tileset) const
 			if(tiles[x][y].id==AIR)
 				continue;
 
-			float pixelX = static_cast<float>((cx * CHUNK_SIZE + x) * TILE_SIZE);
-			float pixelY = static_cast<float>(
-				(cy * CHUNK_SIZE + y) * TILE_SIZE
-				);
+			Vector2 position = { static_cast<float>((cx * CHUNK_SIZE + x) * TILE_SIZE),static_cast<float>((cy * CHUNK_SIZE + y) * TILE_SIZE)};
 			const int id = tiles[x][y].id;
 
-			Rectangle srcRec = {
-				static_cast<float>((id % 8) * TILE_SIZE),
-				static_cast<float>((id / 8) * TILE_SIZE),
-				static_cast<float>(TILE_SIZE),
-				static_cast<float>(TILE_SIZE)
-			};
-			Vector2 destPos = { pixelX, pixelY };
-
-			DrawTextureRec(tileset, srcRec, destPos, WHITE);
+			renderer.draw(id, position, static_cast<float>(TILE_SIZE));
 		}
 	}
 }

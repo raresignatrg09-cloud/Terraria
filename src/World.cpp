@@ -22,9 +22,6 @@ Tile* World::getTileAt(float tileX, float tileY)
 	int chunkX = static_cast<int>(std::floor(static_cast<float>(tileX) / CHUNK_SIZE));
 	int chunkY = static_cast<int>(std::floor(static_cast<float>(tileY) / CHUNK_SIZE));
 
-	if (chunkX<MIN_CHUNK_Y || chunkX>MAX_CHUNK_Y)
-		return nullptr;
-
 	uint64_t key = getChunkKey(chunkX, chunkY);
 
 	auto it = chunks.find(key);
@@ -67,11 +64,11 @@ void World::update(const Camera2D& camera)
 	// Remove chunks that are no longer in view
 }
 
-void World::draw(const Texture2D & tileset, bool drawDebug) const
+void World::draw(const TileRenderer& renderer, bool drawDebug) const
 {
 	for(const auto& pair: chunks)
 	{
-		pair.second->draw(tileset);
+		pair.second->draw(renderer);
 
 #if defined(_DEBUG) || !defined(NDEBUG)
 		if (drawDebug)

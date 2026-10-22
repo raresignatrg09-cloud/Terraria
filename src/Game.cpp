@@ -14,6 +14,7 @@ Game::Game(int width, int height, const char* title)
 	camera.offset = Vector2{ static_cast<float>(screenWidth) / 2.0f, static_cast<float>(screenHeight) / 2.0f };
 
 	tileset = LoadTexture(RESOURCES_PATH"textures/texture_atlas.png");
+	tileRenderer.setTexture(tileset);
 }
 
 Game::~Game()
@@ -97,14 +98,6 @@ void Game::handleInput()
 		const int tileX = static_cast<int>(std::floor(mouseWorldPos.x / TILE_SIZE));
 		const int tileY = static_cast<int>(std::floor(mouseWorldPos.y / TILE_SIZE));
 
-		int chunkX = static_cast<int>(std::floor(static_cast<float>(tileX) / CHUNK_SIZE));
-
-		int chunkY = static_cast<int>(std::floor(static_cast<float>(tileY) / CHUNK_SIZE));
-
-		int localX = tileX - chunkX * CHUNK_SIZE;
-		int localY = tileY - chunkY * CHUNK_SIZE;
-
-
 		Tile* tile = world.getTileAt(
 			static_cast<float>(tileX),
 			static_cast<float>(tileY)
@@ -136,16 +129,25 @@ void Game::handleInput()
 		const int tileX = static_cast<int>(std::floor(mouseWorldPos.x / TILE_SIZE));
 		const int tileY = static_cast<int>(std::floor(mouseWorldPos.y / TILE_SIZE));
 
-		int chunkX = static_cast<int>(std::floor(static_cast<float>(tileX) / CHUNK_SIZE));
-		int chunkY = static_cast<int>(std::floor(static_cast<float>(tileY) / CHUNK_SIZE));
+		Tile* tile = world.getTileAt(
+			static_cast<float>(tileX),
+			static_cast<float>(tileY)
+		);
 
-		int localX = tileX - chunkX * CHUNK_SIZE;
-		int localY = tileY - chunkY * CHUNK_SIZE;
-
-		Tile* tile = world.getTileAt(static_cast<float>(tileX), static_cast<float>(tileY));
-		if (tile != nullptr && tile->id !=TileType::BEDROCK)
+		if (tile != nullptr && tile->id == AIR)
 		{
-			tile->id = currentTileType;
+			int selectedIndex = inventory.getSelectedSlotIndex();
+			const InventorySlot& slot = inventory.getSlot(selectedIndex);
+
+			if (!slot.isEmpty())
+			{
+				TileType tileType = getTileFromItem(slot.item.type);
+
+				if (tileType != AIR && inventory.removeItem(slot.item, 1))
+				{
+					tile->id = tileType;
+				}
+			}
 		}
 	}
 }
@@ -165,7 +167,7 @@ void Game::draw()
 	ClearBackground(SKYBLUE);
 
 	BeginMode2D(camera);
-		world.draw(tileset, debugMode);
+		world.draw(tileRenderer, debugMode);
 		player.draw(debugMode);
 	EndMode2D();
 	
@@ -177,12 +179,12 @@ void Game::draw()
 		DrawText(TextFormat("x: %.0f, y: %.0f", tilePosition.x, tilePosition.y), 10, 30, 20, WHITE);
 	}
 
-	drawHotbar();
+	drawHotbar(tileRenderer);
 
 	EndDrawing();
 }
 
-void Game::drawHotbar() const
+void Game::drawHotbar(const TileRenderer& renderer) const
 {
 	constexpr int SLOT_SIZE = 50;
 	constexpr int SLOT_GAP = 4;
@@ -204,6 +206,10 @@ void Game::drawHotbar() const
 
 		if (!slot.isEmpty())
 		{
+			int textureID = getTextureIndexFromItem(slot.item.type);
+			renderer.draw(textureID, { static_cast<float>(x + 9),
+				static_cast<float>(y + 5) }, TILE_SIZE);
+
 			DrawText(TextFormat("%d", slot.count), x + 28, y + 28, 16, WHITE);
 		}
 	}

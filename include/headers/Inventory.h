@@ -53,7 +53,6 @@ public:
 		}
 	}
 
-
 	bool addItem(const Item& item, int count)
 	{
 		if (count <= 0 || item.type == ItemType::NONE)
@@ -98,21 +97,29 @@ public:
 		return false;
 	}
 
-
-	void removeItem(int index, int count)
+	bool removeItem(const Item& item, int count)
 	{
-		if (index >= 0 && index < MAX_SLOTS)
+		if (count <= 0)
+			return false;
+
+		// Find a matching slot with enough items.
+		for (auto& slot : slots)
 		{
-			auto& slot = slots[index];
-			if (!slot.isEmpty())
-			{
-				slot.count -= count;
-				if (slot.count <= 0)
-				{
-					slot.clear();
-				}
-			}
+			if (slot.isEmpty() || slot.item.type != item.type)
+				continue;
+
+			if (slot.count < count)
+				continue;
+
+			slot.count -= count;
+
+			if (slot.count == 0)
+				slot.clear();
+
+			return true;
 		}
+
+		return false;
 	}
 
 private:
