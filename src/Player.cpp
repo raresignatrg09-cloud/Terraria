@@ -4,7 +4,7 @@
 #include <cmath>
 
 Player::Player(Vector2 position)
-	: position(position), size({ static_cast<float>(TILE_SIZE), static_cast<float>(TILE_SIZE) }), speed(400.0f), velocity({ 0.0f, 0.0f })
+	: position(position), size({ static_cast<float>(TILE_SIZE), static_cast<float>(TILE_SIZE) }), speed(1000.0f), velocity({ 0.0f, 0.0f })
 {
 	hitbox.setSize(size, hitboxScale);
 	hitbox.setPosition(position, size);

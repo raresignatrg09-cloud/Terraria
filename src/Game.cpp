@@ -13,6 +13,9 @@ Game::Game(int width, int height, const char* title)
 	camera.zoom = 1.0f;
 	camera.offset = Vector2{ static_cast<float>(screenWidth) / 2.0f, static_cast<float>(screenHeight) / 2.0f };
 
+	srand(time(NULL)); 
+	Chunk::setSeed(std::rand() % 1000);
+
 	tileset = LoadTexture(RESOURCES_PATH"textures/texture_atlas.png");
 	tileRenderer.setTexture(tileset);
 }
@@ -38,18 +41,15 @@ void Game::run()
 
 void Game::handleInput()
 {
-	if (IsKeyPressed(KEY_ESCAPE))
-	{
-		CloseWindow();
-	}
-	if(IsKeyPressed(KEY_KP_ADD))
+	if (IsKeyPressed(KEY_KP_ADD) && camera.zoom <= 2.0f)
 	{
 		camera.zoom += 0.1f;
 	}
-	if(IsKeyPressed(KEY_KP_SUBTRACT))
+	if (IsKeyPressed(KEY_KP_SUBTRACT) && camera.zoom >= 0.5f)
 	{
 		camera.zoom -= 0.1f;
 	}
+	TraceLog(LOG_INFO, TextFormat("zoom: %.2f", camera.zoom));
 	if (IsKeyPressed(KEY_F1))
 	{
 		debugMode = !debugMode;
@@ -177,6 +177,7 @@ void Game::draw()
 
 		Vector2 tilePosition = player.getTilePosition();
 		DrawText(TextFormat("x: %.0f, y: %.0f", tilePosition.x, tilePosition.y), 10, 30, 20, WHITE);
+		DrawText(TextFormat("seed: %d", Chunk::getSeed()), 10, 50, 20, WHITE);
 	}
 
 	drawHotbar(tileRenderer);

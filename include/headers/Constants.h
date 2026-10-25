@@ -18,3 +18,6 @@ constexpr int SURFACE_Y = 100;
 constexpr int HEIGHT_VARIATION = 5;
 constexpr int DIRT_DEPTH = 5;
 constexpr int BEDROCK_Y = 0;
+constexpr int SEA_LEVEL = 35;
+constexpr int SNOW_LINE = 75;
+constexpr int OCEAN_DEPTH = 12;

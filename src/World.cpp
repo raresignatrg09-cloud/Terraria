@@ -26,9 +26,7 @@ Tile* World::getTileAt(float tileX, float tileY)
 
 	auto it = chunks.find(key);
 	if (it == chunks.end())
-	{
 		return nullptr;
-	}
 
 	int localTileX = static_cast<int>(tileX) - chunkX * CHUNK_SIZE;
 	int localTileY = static_cast<int>(tileY) - chunkY * CHUNK_SIZE;

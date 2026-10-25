@@ -13,7 +13,29 @@ enum class ItemType :std::uint16_t
 	SAND,
 	LOG,
 	LEAVES,
-	BEDROCK
+	BEDROCK,
+	GLASS,
+	SNOW,
+	GRASS_SNOW,
+	ICE,
+	CACTUS,
+	GRAVEL,
+
+	// Ores
+	COAL_ORE,
+	IRON_ORE,
+	COPPER_ORE,
+	GOLD_ORE,
+
+	// Terrain
+	CLAY,
+	MOSSY_STONE,
+	OBSIDIAN,
+
+	// Other
+	TORCH,
+	BRICK,
+	PLANKS
 };
 
 struct Item
@@ -22,11 +44,11 @@ struct Item
 	std::string name = "None";
 	int maxStackSize = 64;
 
-	bool isStackable = true;
+	bool isStackable  = true;
 	bool isConsumable = false;
 	bool isEquippable = false;
-	bool isUsable = false;
-	bool isCraftable = false;
-	bool isDroppable = true;
-	bool isPlaceable = false;
+	bool isUsable     = false;
+	bool isCraftable  = false;
+	bool isDroppable  = true;
+	bool isPlaceable  = false;
 };

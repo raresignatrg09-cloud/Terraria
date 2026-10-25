@@ -46,13 +46,11 @@ inline int getTextureIndexFromItem(ItemType type)
     return -1;
 }
 
-
 inline TileType getTileFromItem(ItemType type)
 {
     for (int i = 0; i < TILE_DEFINITION_COUNT; ++i)
     {
-        if (TILE_DEFINITIONS[i].drop == type &&
-            type != ItemType::NONE)
+        if (TILE_DEFINITIONS[i].drop == type && type != ItemType::NONE)
         {
             return static_cast<TileType>(i);
         }
