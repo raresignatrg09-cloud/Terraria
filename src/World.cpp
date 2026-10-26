@@ -60,6 +60,22 @@ void World::update(const Camera2D& camera)
 	}
 
 	// Remove chunks that are no longer in view
+	for (auto it = chunks.begin(); it != chunks.end();)
+	{
+		const Chunk& chunk = *it->second;
+
+		if (chunk.getChunkX() < startChunkX ||
+			chunk.getChunkX() > endChunkX ||
+			chunk.getChunkY() < startChunkY ||
+			chunk.getChunkY() > endChunkY)
+		{
+			it = chunks.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
 }
 
 void World::draw(const TileRenderer& renderer, bool drawDebug) const

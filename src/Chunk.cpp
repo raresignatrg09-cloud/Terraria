@@ -31,6 +31,11 @@ Chunk::Chunk(int chunkX, int chunkY)
 	mountainNoise.SetFractalType(FastNoiseLite::FractalType_FBm);
 	mountainNoise.SetFractalOctaves(4);
 
+    moistureNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+    moistureNoise.SetFrequency(0.0025f);
+    moistureNoise.SetFractalType(FastNoiseLite::FractalType_FBm);
+    moistureNoise.SetFractalOctaves(3);
+
 	generate();
 }
 
@@ -41,58 +46,7 @@ void Chunk::generate()
         const int worldX = cx * CHUNK_SIZE + x;
         const Biome biome = getBiome(worldX);
 
-        const float broad = terrainNoise.GetNoise(
-            static_cast<float>(worldX), 0.0f
-        );
-
-        const float detail = detailNoise.GetNoise(
-            static_cast<float>(worldX), 0.0f
-        );
-
-        int surfaceY = SURFACE_Y;
-
-        switch (biome)
-        {
-        case Biome::PLAINS:
-            surfaceY += static_cast<int>(
-                std::round(broad * HEIGHT_VARIATION * 0.5f)
-                );
-            break;
-
-        case Biome::FOREST:
-            surfaceY += static_cast<int>(
-                std::round(broad * HEIGHT_VARIATION)
-                );
-            break;
-
-        case Biome::MOUNTAINS:
-        {
-            const float mountain = mountainNoise.GetNoise(
-                static_cast<float>(worldX), 0.0f
-            );
-
-            surfaceY += static_cast<int>(
-                std::round(
-                    mountain * HEIGHT_VARIATION * 2.5f
-                    + broad * HEIGHT_VARIATION * 0.5f
-                )
-                );
-            break;
-        }
-
-        case Biome::OCEAN:
-            surfaceY = SEA_LEVEL - OCEAN_DEPTH +
-                static_cast<int>(
-                    std::round(broad * 3.0f)
-                    );
-            break;
-
-        case Biome::FROZEN:
-            surfaceY += static_cast<int>(
-                std::round(broad * HEIGHT_VARIATION)
-                );
-            break;
-        }
+        const int surfaceY = getSurfaceHeight(worldX, biome);
 
         for (int y = 0; y < CHUNK_SIZE; ++y)
         {
@@ -116,8 +70,7 @@ void Chunk::generate()
             if (worldY > surfaceY)
             {
                 // Fill the ocean between the seabed and sea level.
-                if (biome == Biome::OCEAN &&
-                    worldY <= SEA_LEVEL)
+                if (biome == Biome::OCEAN && worldY <= SEA_LEVEL)
                 {
                     block = WATER;
                 }
@@ -140,8 +93,7 @@ void Chunk::generate()
                         break;
 
                     case Biome::MOUNTAINS:
-                        block = surfaceY >= SNOW_LINE
-                            ? SNOW : STONE;
+                        block = surfaceY >= SNOW_LINE ? SNOW : STONE;
                         break;
 
                     case Biome::OCEAN:
@@ -153,13 +105,15 @@ void Chunk::generate()
                         break;
                     }
                 }
-                else if (biome == Biome::OCEAN &&
-                    depth <= DIRT_DEPTH)
+                else if (biome == Biome::OCEAN && depth <= DIRT_DEPTH)
                 {
                     block = SAND;
                 }
-                else if (biome == Biome::MOUNTAINS &&
-                    depth < 4)
+                else if (biome == Biome::FROZEN && depth <= 3)
+                {
+                    block = GRASS_SNOW; // Replace with ice or permafrost if you add those tiles.
+                }
+                else if (biome == Biome::MOUNTAINS)
                 {
                     block = STONE;
                 }
@@ -222,28 +176,22 @@ const Tile& Chunk::getTile(int localX, int localY) const
 
 Biome Chunk::getBiome(int worldX) const
 {
-	const float region      = biomeNoise.GetNoise(static_cast<float>(worldX), 0.0f);
-	const float temperature = temperatureNoise.GetNoise(static_cast<float>(worldX), 0.0f);
+    const float x = static_cast<float>(worldX);
+    const float region = biomeNoise.GetNoise(x, 0.0f);
+    const float temperature = temperatureNoise.GetNoise(x, 0.0f);
+    const float moisture = moistureNoise.GetNoise(x, 0.0f);
 
-	if (region < -0.55f)
-    {
+    if (region < -0.55f)
         return Biome::OCEAN;
-    }
 
-	if (temperature > 0.35f)
-    {
+    if (temperature < -0.4f)
         return Biome::FROZEN;
-    }
 
-	if (region > 0.45f)
-    {
+    if (region > 0.45f)
         return Biome::MOUNTAINS;
-    }
 
-	if (region > 0.0f)
-    {
+    if (moisture > 0.1f)
         return Biome::FOREST;
-    }
 
 	return Biome::PLAINS;
 }
@@ -253,20 +201,62 @@ std::string Chunk::getBiomeName()
     return "ba";
 }
 
+int Chunk::getSurfaceHeight(int worldX, Biome biome) const
+{
+    const float x = static_cast<float>(worldX);
+
+    const float broad = terrainNoise.GetNoise(x, 0.0f);
+    const float detail = detailNoise.GetNoise(x, 0.0f);
+
+    float height = static_cast<float>(SURFACE_Y);
+
+    switch (biome)
+    {
+    case Biome::PLAINS:
+        height += broad * HEIGHT_VARIATION * 0.5f;
+        height += detail * 1.5f;
+        break;
+
+    case Biome::FOREST:
+        height += broad * HEIGHT_VARIATION;
+        height += detail * 2.0f;
+        break;
+
+    case Biome::MOUNTAINS:
+    {
+        const float ridge = getRidgedNoise(static_cast<float>(worldX));
+        const float base = broad * HEIGHT_VARIATION * 0.5f;
+        const float peaks = (ridge - 0.45f) * HEIGHT_VARIATION * 5.0f;
+        height += base + peaks;
+        break;
+    }
+
+    case Biome::OCEAN:
+        height = SEA_LEVEL - OCEAN_DEPTH + broad * 3.0f;
+        break;
+
+    case Biome::FROZEN:
+        height += broad * HEIGHT_VARIATION;
+        height += detail;
+        break;
+    }
+
+    return static_cast<int>(std::round(height));
+}
+
+float Chunk::getRidgedNoise(float worldX) const
+{
+    float n = mountainNoise.GetNoise(worldX, 0.0f);
+    n = 1.f - std::abs(n);
+    return n * n;
+}
+
 void Chunk::drawDebug() const
 {
-	// Calculăm dimensiunea totală a unui chunk în pixeli (16 blocuri * 16 pixeli = 256 pixeli)
 	float chunkSizePixels = static_cast<float>(CHUNK_SIZE * TILE_SIZE);
 
-	// Poziția globală în pixeli a colțului stânga-sus al acestui chunk
 	float pixelX = static_cast<float>(cx * chunkSizePixels);
 	float pixelY = static_cast<float>(cy * chunkSizePixels);
 
-	// Desenăm doar linia de contur (grosime de 1 sau 2 pixeli)
-	// Folosim o culoare vizibilă (ex: ROȘU sau VERDE)
 	DrawRectangleLinesEx(Rectangle{ pixelX, pixelY, chunkSizePixels, chunkSizePixels }, 1.0f, RED);
-
-	// Opțional: Poți scrie și coordonatele chunk-ului text, direct în centrul lui pentru debug facil
-	std::string coords = "(" + std::to_string(cx) + ", " + std::to_string(cy) + ")";
-	DrawText(coords.c_str(), pixelX + 5, pixelY + 5, 10, YELLOW);
 }

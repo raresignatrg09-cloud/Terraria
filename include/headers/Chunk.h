@@ -33,6 +33,8 @@ public:
 	std::string getBiomeName();
 	static void setSeed(int seedValue) { seed = seedValue; }
 	static int getSeed() { return seed; }
+	int getSurfaceHeight(int worldX, Biome biome) const;
+	float getRidgedNoise(float worldX) const;
 
 	void drawDebug() const;
 private:
@@ -47,4 +49,5 @@ private:
 	FastNoiseLite biomeNoise{ seed };
 	FastNoiseLite temperatureNoise{ seed };
 	FastNoiseLite mountainNoise{ seed };
+	FastNoiseLite moistureNoise{ seed };
 };
